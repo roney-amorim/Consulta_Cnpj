@@ -1,0 +1,279 @@
+<html>
+<head>
+<title>CNPJ</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<!-- Adicionando Javascript -->
+<script type="text/javascript" >
+
+$(document).ready(function(){
+
+    $("#atividades").hide(); 
+});
+    function preencheDados(dados) {
+        // Limpa valores do formulário de cnpj.
+
+        $("#cnpj").val(dados.cnpj);
+        $("#razao_social").val(dados.nome);
+        $("#fantasia").val(dados.fantasia);
+        $("#rua").val(dados.logradouro);
+        $("#numero").val(dados.numero);
+        $("#cep").val(dados.cep);
+        $("#complemento").val(dados.complemento);
+        $("#bairro").val(dados.bairro);
+        $("#cidade").val(dados.municipio);
+        $("#uf").val(dados.uf);
+        $("#capital").val("R$ "+dados.capital_social); 
+    }
+    function limpa_formulário_cnpj() {
+        // Limpa valores do formulário de cnpj.
+
+        $("#razao_social").val("");
+        $("#fantasia").val("");
+        $("#rua").val("");
+        $("#numero").val("");
+        $("#complemento").val("");
+        $("#cep").val("");
+        $("#complemento").val("");
+        $("#bairro").val("");
+        $("#cidade").val("");
+        $("#uf").val("");
+        $("#atividades").hide(); 
+    }
+
+        //Quando o campo cnpj perde o foco.
+       
+   function cnpj() {
+
+    $("#atividade_principal").hide();
+    $("#atividades_secundarias").hide();
+    $("#conteudo_ap").html("");
+    $("#conteudo_as").html("");
+    var cnpj = $("#cnpj").val().replace(/\D/g, '');
+
+            //Verifica se campo cnpj possui valor informado.
+            if (cnpj != "") {
+
+                //Expressão regular para validar o CNPJ.
+                var validacnpj = /^[0-9]/;
+
+                //Valida o formato do CNPJ.
+                if(validacnpj.test(cnpj)) {
+                    $.ajax({
+                        type: "GET",
+                        url: "http://receitaws.com.br/v1/cnpj/"+ cnpj,
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "jsonp",
+                        success: function (dados) {
+                                if (!("erro" in dados)) { 
+                                            $("tbody").remove();
+                                            preencheDados(dados);
+                                            //atividade principal 
+                                            var atividade = "<tbody><tr><td>Principal</td>"
+                                                + "<td>" + dados.atividade_principal[0].text + "</td>"
+                                                + "<td>" + dados.atividade_principal[0].code + "</td></tr></tbody>";
+                                            
+                                            $("#atividades").append(atividade);
+                                    var i = 0;
+                                    while(dados.atividades_secundarias[i]!= undefined){  
+
+                                            var atividade = "<tbody><tr><td>Secundária</td>"
+                                                + "<td>" + dados.atividades_secundarias[0].text + "</td>"
+                                                + "<td>" + dados.atividades_secundarias[0].code + "</td></tr></tbody>";
+                                            
+                                            $("#atividades").append(atividade);              
+                                                
+                                                i++; 
+                                    }
+
+                                    $("#atividades").show(); 
+                                } else {
+                                    //Cnpj pesquisado não foi encontrado.
+                                    limpa_formulário_cnpj();
+                                    alert("CNPJ não encontrado.");
+                                }
+                        },
+                        error: function(e){
+                            alert(e.statusText);              
+                        }       
+                    });
+
+             
+                } //end if.
+                else {
+                    //cnpj é inválido.
+                    limpa_formulário_cnpj();
+                    alert("Formato de CNPJ inválido.");
+                }
+            } //end if.
+            else {
+                //cnpj sem valor, limpa formulário.
+                limpa_formulário_cnpj();
+            }
+       
+    }
+
+</script>
+<style>
+    #logo_receita {
+        width: 80px;
+        height: 80px;
+        max-width: 100%;
+    }
+</style>
+</head>
+
+<body> 
+<div class="divMiolo">
+    <script language="javascript" src="http://www.receita.fazenda.gov.br/js/cabecalho-governo.js" type="text/javascript"></script>
+</div>
+ 
+<div class="container"> 
+    <div class="row"> 
+        <div class="col-md-10 col-md-offset-1"> 
+            <div class="row" style="margin-top: 10px">
+                <div class="col-md-12 col-md-offset-2"> 
+                    <!-- Text input-->
+                    <div class="row">
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label> <img id="logo_receita" src="https://ac24h-acrehost.netdna-ssl.com/wp-content/uploads/2013/10/receita-federal-21.png?w=640"/></label> 
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group"> 
+                                <h1><label> Consulta CNPJ</label></h1>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label> <img id="logo_receita" src="http://www.fazenda.gov.br/assuntos/agenda/imagens/BRASOGMF.jpg/@@images/2f62e373-49bf-4997-bad0-a042a31096d9.jpeg"/></label> 
+                            </div>
+                        </div>
+                    </div> 
+                </div>  
+            </div> 
+            <hr>
+            <!-- Text input-->
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="cnpj">CNPJ</label>  
+                        <input id="cnpj" name="cnpj" type="text" maxlength="18" placeholder="cnpj" class="form-control input-md" required="">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group" style="padding-top: 5%"> 
+                        <button id="btn_cnpj" class="btn btn-default" size="8" onclick="cnpj()"> <span class="glyphicon glyphicon-search"></span> Pesquisar </button> 
+                    </div>
+                </div>
+            </div>  
+            <hr>
+            <div class="row">
+                <div class="col-md-6">
+                    <!-- Text input-->
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="razao_social">Razão Social</label>  
+                      <input id="razao_social" name="razao_social" type="text" placeholder="razão social" class="form-control input-md" required="">
+                                
+                    </div>
+                </div>   
+                <div class="col-md-6">
+                    <!-- Password input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="fantasia">Nome Fantasia</label> 
+                        <input id="fantasia" name="fantasia" type="text" placeholder="nome fantasia" class="form-control input-md" required="">
+                    </div>
+                </div>
+            </div>   
+
+            <div class="row">
+                <div class="col-md-10">
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="rua">Rua</label>   
+                        <input id="rua" name="rua" type="text" placeholder="rua" class="form-control input-md" required="">
+                        
+                    </div>
+                </div> 
+                <div class="col-md-2">
+                    <!-- Text input-->
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="numero">Número</label>   
+                      <input id="numero" name="numero" type="text" placeholder="número" class="form-control input-md" required="">
+                        
+                    </div> 
+                </div>
+            </div>   
+
+            <div class="row">
+                <div class="col-md-4">
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="complemento">Complemento</label>   
+                        <input id="complemento" name="complemento" type="text" placeholder="complemento" class="form-control input-md" required="">
+                        
+                    </div>
+                </div>  
+                <div class="col-md-5">          
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="bairro">Bairro</label>   
+                        <input id="bairro" name="bairro" type="text" placeholder="bairro" class="form-control input-md" required="">
+                    </div>
+                </div> 
+                <div class="col-md-3">
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="cep">Cep</label>   
+                        <input id="cep" name="cep" type="text" placeholder="cep" class="form-control input-md" required="">
+                    </div>
+                </div> 
+            </div>   
+            <div class="row">
+                <div class="col-md-6">          
+                    <!-- Text input-->
+                    <div class="form-group">
+                        <label class="col-md-4 control-label" for="cidade">Cidade</label>   
+                        <input id="cidade" name="cidade" type="text" placeholder="cidade" class="form-control input-md" required="">
+                    </div> 
+                </div> 
+                <div class="col-md-2">              
+                    <!-- Text input-->
+                    <div class="form-group">
+                      <label class="col-md-4 control-label" for="uf">UF</label>   
+                      <input id="uf" name="uf" type="text" placeholder="uf" class="form-control input-md" required="">
+                      </div>
+                </div> 
+                <div class="col-md-4">              
+                    <!-- Text input-->
+                    <div class="form-group">
+                      <label class="col-md-12 control-label" for="capital">Capital Social</label>   
+                      <input id="capital" name="capital" type="text" placeholder="capital social" class="form-control input-md" required="">
+                      </div>
+                </div> 
+            </div>   
+            
+            <hr>
+            <div class="table-resposive">
+                <table class="table table-hover table-striped" id="atividades">
+                    <thead>
+                        <tr>
+                            <th>Tipo de Atividade</th>
+                            <th>Atividade</th>
+                            <th>Código</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+       
+</body>
+
+</html>
